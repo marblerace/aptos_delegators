@@ -25,17 +25,13 @@ jobs:
         python -m pip install --upgrade pip
         pip install selenium matplotlib pandas webdriver_manager
 
-    # Step 1: Run calculation1.py
-    - name: Run calculation1.py
-      run: python calculation1.py
+    # Run delegation_analysis.py
+    - name: Run delegation_analysis.py
+      run: python delegation_analysis.py
 
-    # Step 2: Run calculation2.py (plotting and OP data processing)
-    - name: Run calculation2.py
-      run: python calculation2.py
-
-    # Step 3: Run calculation3.py (APT drop estimation)
-    - name: Run calculation3.py
-      run: python calculation3.py
+    # Run drop_analysis.py
+    - name: Run drop_analysis.py
+      run: python drop_analysis.py
 
     - name: Commit and push results
       env:
