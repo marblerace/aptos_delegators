@@ -37,14 +37,11 @@ try:
     # Initialize total for summing up the numbers
     total_delegators = 0
 
-    # Loop through each row and debug the structure
+    # Loop through each row and retrieve the seventh <td> element
     for index, row in enumerate(validator_rows, start=1):
         try:
-            # Print the HTML content of each <a> row to verify structure
-            print(f"\nHTML content of row {index}:\n", row.get_attribute("outerHTML"))
-
-            # Attempt to get the third <td> within this row
-            delegators_td = row.find_elements(By.XPATH, ".//td[@class='MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-x79huy']")[2]
+            # Get the seventh <td> within this row
+            delegators_td = row.find_elements(By.XPATH, "./td[@class='MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-x79huy']")[6]
             number = int(delegators_td.text)
             total_delegators += number
             print(f"Found delegators count in row {index}: {number}")
