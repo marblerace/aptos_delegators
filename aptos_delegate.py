@@ -112,8 +112,7 @@ try:
         file.write(f"Average amount received: {average_op:.2f} (${average_op * op_usd_price:.2f})<br>\n")
         file.write(f"Median amount received: {median_op:.2f} (${median_op * op_usd_price:.2f})<br>\n")
         file.write(f"Total drop distribution: {total_op_drop} (${total_op_usd_value:.2f})<br><br>\n")
-        file.write(f"If Aptos Foundation spent the same amount for the delegation airdrop as Optimism Foundation team (${total_op_usd_value:.2f}),<br>\n")
-        file.write(f"they will spend {d_value:.2f} APT for this airdrop.<br>\n")
+        file.write(f"If Aptos Foundation spent the same amount for the delegation airdrop as Optimism Foundation team (${total_op_usd_value:.2f}),they will spend {d_value:.2f} APT for this airdrop.<br>\n")
         file.write(f"With this logic, every APT delegate will receive on average: {f_value:.2f} APT (${e_value:.2f})<br>\n")
 
 except Exception as e:
