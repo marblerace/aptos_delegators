@@ -112,12 +112,17 @@ try:
     total_drop_usd = total_op_drop * op_usd_price
 
     # Append OP data to README.md
-    with open("README.md", "a") as file:
-        file.write(f"\nOP received for the third airdrop on 18.09.2023 (price of OP was ${op_usd_price}):\n")
+    # Write the result to README.md with line breaks for better readability
+    with open("README.md", "w") as file:
+        file.write(f"# Delegators Count\n\n")
+        file.write(f"Total Delegators: {total_delegators}\n")
+        file.write(f"Total APT Delegated: {total_apt_delegated}\n\n")
+        file.write(f"OP received for the third airdrop on 18.09.2023 (price of OP was ${op_usd_price}):\n")
         file.write(f"Addresses received drop: {len(op_data)}\n")
         file.write(f"Average amount received: {average_op:.2f} (${average_op_usd:.2f})\n")
         file.write(f"Median amount received: {median_op:.2f} (${median_op_usd:.2f})\n")
         file.write(f"Total drop distribution: {total_op_drop} (${total_drop_usd:.2f})\n")
+
 
 except Exception as e:
     print("An error occurred:", e)
