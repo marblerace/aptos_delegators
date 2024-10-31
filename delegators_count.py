@@ -26,10 +26,14 @@ try:
     driver.get(url)
     print(f"Opened URL: {url}")
 
-    # Wait until table body is loaded
-    wait = WebDriverWait(driver, 30)  # Extending wait time
-    wait.until(EC.presence_of_element_located((By.XPATH, "//tbody[@class='MuiTableBody-root css-fzvvaf']")))
-    print("Table body located")
+    # Wait for the <table> element to load
+    wait = WebDriverWait(driver, 30)
+    table = wait.until(EC.presence_of_element_located((By.XPATH, "//table[@class='MuiTable-root css-81my7i']")))
+    print("Located <table> element.")
+
+    # Locate the <tbody> within the table
+    tbody = table.find_element(By.XPATH, "./tbody[@class='MuiTableBody-root css-fzvvaf']")
+    print("Located <tbody> within the table.")
 
     # Scroll to ensure dynamic content loads
     last_height = driver.execute_script("return document.body.scrollHeight")
@@ -45,8 +49,8 @@ try:
         scroll_attempts += 1
     print("Scrolling complete, checking for rows...")
 
-    # Verify presence of rows in the table body
-    validator_rows = driver.find_elements(By.XPATH, "//tbody[@class='MuiTableBody-root css-fzvvaf']//a[@role='row']")
+    # Find all <a> elements in the tbody which represent each validator row
+    validator_rows = tbody.find_elements(By.XPATH, ".//a[@role='row']")
     print(f"Found {len(validator_rows)} validator rows after scrolling")
 
     # Initialize total for summing up the numbers
