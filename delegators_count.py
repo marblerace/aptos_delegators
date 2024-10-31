@@ -5,6 +5,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
+import time
 
 print("Starting script")
 
@@ -25,10 +26,17 @@ try:
     driver.get(url)
     print(f"Opened URL: {url}")
 
-    # Allow time for the page to load fully
+    # Allow time for the page to load fully and print the page source
     wait = WebDriverWait(driver, 15)
     wait.until(EC.presence_of_all_elements_located((By.XPATH, "//tbody[@class='MuiTableBody-root css-fzvvaf']")))
     print("Table body located")
+
+    # Print the entire page source to check if elements are loaded
+    print("Page source after load:\n", driver.page_source)
+
+    # Locate the table body to ensure it’s found
+    table_body = driver.find_element(By.XPATH, "//tbody[@class='MuiTableBody-root css-fzvvaf']")
+    print("Located <tbody> element:\n", table_body.get_attribute("outerHTML"))
 
     # Find all <a> elements in the tbody which represent each validator row
     validator_rows = driver.find_elements(By.XPATH, "//tbody[@class='MuiTableBody-root css-fzvvaf']//a[@role='row']")
@@ -39,7 +47,11 @@ try:
 
     # Loop through each row and retrieve the seventh <td> element
     for index, row in enumerate(validator_rows, start=1):
+        print(f"\nProcessing row {index}")
         try:
+            # Print the outer HTML of the <a> row to verify structure
+            print(f"HTML content of row {index}:\n", row.get_attribute("outerHTML"))
+
             # Get the seventh <td> within this row
             delegators_td = row.find_elements(By.XPATH, "./td[@class='MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-x79huy']")[6]
             number = int(delegators_td.text)
