@@ -87,7 +87,7 @@ try:
     plt.yticks([45000, 46000, 47000], color="white")
     plt.gca().set_facecolor("#2E2E2E")
     plt.gcf().set_facecolor("#2E2E2E")
-    plt.savefig("delegators_plot.png", facecolor="#2E2E2E")
+    plt.savefig("delegators.png", facecolor="#2E2E2E")
     plt.close()
 
     # 3. Analyze OP airdrop data
@@ -103,18 +103,18 @@ try:
     e_value = total_op_usd_value / total_delegators
     f_value = e_value / apt_price
 
-    # Write all results to README.md with line breaks for readability
+    # Write all results to README.md with line breaks for readability and plot reference
     with open("README.md", "w") as file:
         file.write(f"# Delegators Count (APT ${apt_price:.2f})<br><br>\n")
         file.write(f"Total Delegators: {total_delegators}<br>\n")
         file.write(f"Total APT Delegated: {total_apt_delegated}<br><br>\n")
+        file.write(f"![Delegators Plot](delegators.png)<br><br>\n")  # Add plot image reference
         file.write(f"**OP received for the third airdrop on 18.09.2023 (price of OP was ${op_usd_price}):**<br>\n")
         file.write(f"Addresses received drop: {len(op_data)}<br>\n")
         file.write(f"Average amount received: {average_op:.2f} (${average_op * op_usd_price:.2f})<br>\n")
         file.write(f"Median amount received: {median_op:.2f} (${median_op * op_usd_price:.2f})<br>\n")
         file.write(f"Total drop distribution: {total_op_drop} (${total_op_usd_value:.2f})<br><br>\n")
-        file.write(f"If Aptos Foundation spent the same amount for the delegation airdrop as Optimism Foundation team (${total_op_usd_value:.2f}),<br>\n")
-        file.write(f"they will spend {d_value:.2f} APT for this airdrop.<br>\n")
+        file.write(f"If Aptos Foundation spent the same amount for the delegation airdrop as Optimism Foundation team (${total_op_usd_value:.2f}),they will spend {d_value:.2f} APT for this airdrop.<br>\n")
         file.write(f"With this logic, every APT delegate will receive on average: {f_value:.2f} APT (${e_value:.2f})<br>\n")
 
 except Exception as e:
