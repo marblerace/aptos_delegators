@@ -1,3 +1,3 @@
 # Delegators Count
 
-Total Delegators: 0
+Total Delegators: 46997
