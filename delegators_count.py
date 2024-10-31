@@ -25,13 +25,16 @@ try:
     driver.get(url)
     print(f"Opened URL: {url}")
 
-    # Allow time for the page to load fully by waiting for the table structure to be present
+    # Allow time for the page to load fully
     wait = WebDriverWait(driver, 15)
     wait.until(EC.presence_of_all_elements_located((By.XPATH, "//tbody[@class='MuiTableBody-root css-fzvvaf']")))
     print("Table body located")
 
+    # Print page source to verify content load
+    print("Page source:", driver.page_source)
+
     # Find all <a> elements in the tbody which represent each validator row
-    validator_rows = driver.find_elements(By.XPATH, "//tbody[@class='MuiTableBody-root css-fzvvaf']/a[@role='row']")
+    validator_rows = driver.find_elements(By.XPATH, "//tbody[@class='MuiTableBody-root css-fzvvaf']//a[@role='row']")
     print(f"Found {len(validator_rows)} validator rows")
 
     # Extract the third <td> element from each row and sum up the values
