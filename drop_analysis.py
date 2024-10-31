@@ -1,3 +1,5 @@
+import pandas as pd
+
 # Constants
 apt_price = 9.5
 op_usd_price = 1.368
