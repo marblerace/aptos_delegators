@@ -38,5 +38,4 @@ jobs:
         if [ -n "$(git status --porcelain)" ]; then
           git commit -m 'Update delegators count and plot'
           git push
-        else
-          echo "No changes to commit"
+        fi
