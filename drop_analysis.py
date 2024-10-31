@@ -8,15 +8,24 @@ total_op_usd_value = total_op_drop * op_usd_price
 
 # Fetch APT price from Aptos Scan API
 url = "https://public-api.aptoscan.com/v1/coins/0x1%3A%3Aaptos_coin%3A%3AAptosCoin"
-response = requests.get(url)
-data = response.json()
+try:
+    response = requests.get(url)
+    response.raise_for_status()  # Check if the request was successful
+    data = response.json()  # Parse JSON response
+except requests.exceptions.RequestException as e:
+    print("Error fetching data from Aptos Scan API:", e)
+    raise SystemExit(e)
+except ValueError as e:
+    print("Error decoding JSON:", e)
+    print("Response content:", response.text)  # Print the raw response for debugging
+    raise SystemExit(e)
 
 # Extract current APT price
-if response.status_code == 200 and data["success"]:
+if data.get("success"):
     apt_price = data["data"]["current_price"]
     print(f"Current APT price fetched: ${apt_price}")
 else:
-    raise ValueError("Failed to fetch APT price from Aptos Scan API")
+    raise ValueError("Failed to fetch APT price: API response indicates failure")
 
 # Total amount in APT if Aptos spent the same as Optimism
 d_value = total_op_usd_value / apt_price
