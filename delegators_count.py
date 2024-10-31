@@ -26,21 +26,28 @@ try:
     driver.get(url)
     print(f"Opened URL: {url}")
 
-    # Allow time for the page to load fully and print the page source
-    wait = WebDriverWait(driver, 15)
-    wait.until(EC.presence_of_all_elements_located((By.XPATH, "//tbody[@class='MuiTableBody-root css-fzvvaf']")))
+    # Wait until table body is loaded
+    wait = WebDriverWait(driver, 30)  # Extending wait time
+    wait.until(EC.presence_of_element_located((By.XPATH, "//tbody[@class='MuiTableBody-root css-fzvvaf']")))
     print("Table body located")
 
-    # Print the entire page source to check if elements are loaded
-    print("Page source after load:\n", driver.page_source)
+    # Scroll to ensure dynamic content loads
+    last_height = driver.execute_script("return document.body.scrollHeight")
+    scroll_attempts = 0
+    while scroll_attempts < 5:  # Scroll up to 5 times to load content
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        time.sleep(3)  # Wait to allow loading
 
-    # Locate the table body to ensure it’s found
-    table_body = driver.find_element(By.XPATH, "//tbody[@class='MuiTableBody-root css-fzvvaf']")
-    print("Located <tbody> element:\n", table_body.get_attribute("outerHTML"))
+        new_height = driver.execute_script("return document.body.scrollHeight")
+        if new_height == last_height:  # Exit if no more content is loaded
+            break
+        last_height = new_height
+        scroll_attempts += 1
+    print("Scrolling complete, checking for rows...")
 
-    # Find all <a> elements in the tbody which represent each validator row
+    # Verify presence of rows in the table body
     validator_rows = driver.find_elements(By.XPATH, "//tbody[@class='MuiTableBody-root css-fzvvaf']//a[@role='row']")
-    print(f"Found {len(validator_rows)} validator rows")
+    print(f"Found {len(validator_rows)} validator rows after scrolling")
 
     # Initialize total for summing up the numbers
     total_delegators = 0
@@ -49,9 +56,6 @@ try:
     for index, row in enumerate(validator_rows, start=1):
         print(f"\nProcessing row {index}")
         try:
-            # Print the outer HTML of the <a> row to verify structure
-            print(f"HTML content of row {index}:\n", row.get_attribute("outerHTML"))
-
             # Get the seventh <td> within this row
             delegators_td = row.find_elements(By.XPATH, "./td[@class='MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-x79huy']")[6]
             number = int(delegators_td.text)
