@@ -23,10 +23,19 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install matplotlib pandas
+        pip install selenium matplotlib pandas
 
-    - name: Run script
-      run: python delegators_count.py
+    # Step 1: Run calculation1.py
+    - name: Run calculation1.py
+      run: python calculation1.py
+
+    # Step 2: Run calculation2.py (plotting and OP data processing)
+    - name: Run calculation2.py
+      run: python calculation2.py
+
+    # Step 3: Run calculation3.py (APT drop estimation)
+    - name: Run calculation3.py
+      run: python calculation3.py
 
     - name: Commit and push results
       env:
@@ -36,7 +45,7 @@ jobs:
         git config --global user.email 'github-actions@github.com'
         git add README.md delegators_data.csv delegators_plot.png
         if [ -n "$(git status --porcelain)" ]; then
-          git commit -m 'Update delegators count and plot'
+          git commit -m 'Update delegators count, plot, and airdrop estimation'
           git push
         else
           echo "No changes to commit"
