@@ -1,42 +1,22 @@
 import pandas as pd
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support.ui import WebDriverWait  # Import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC  # Import EC for conditions
-from webdriver_manager.chrome import ChromeDriverManager
-import time
+import requests
 
 # Constants
 op_usd_price = 1.368
 total_op_drop = 19411313
 total_op_usd_value = total_op_drop * op_usd_price
 
-# Fetch APT price from CoinGecko
-chrome_options = Options()
-chrome_options.add_argument("--headless")
-chrome_options.add_argument("--no-sandbox")
-chrome_options.add_argument("--disable-dev-shm-usage")
+# Fetch APT price from Aptos Scan API
+url = "https://public-api.aptoscan.com/v1/coins/0x1%3A%3Aaptos_coin%3A%3AAptosCoin"
+response = requests.get(url)
+data = response.json()
 
-driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
-try:
-    # Open the CoinGecko page for Aptos
-    url = "https://www.coingecko.com/en/coins/aptos"
-    driver.get(url)
-    print(f"Opened URL: {url}")
-    
-    # Wait for the price element to load and retrieve the price text
-    price_element = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.XPATH, "//span[@data-converter-target='price']"))
-    )
-    apt_price_text = price_element.text.strip().replace("$", "")
-    apt_price = float(apt_price_text)
+# Extract current APT price
+if response.status_code == 200 and data["success"]:
+    apt_price = data["data"]["current_price"]
     print(f"Current APT price fetched: ${apt_price}")
-    
-finally:
-    driver.quit()
-    print("Closed the WebDriver")
+else:
+    raise ValueError("Failed to fetch APT price from Aptos Scan API")
 
 # Total amount in APT if Aptos spent the same as Optimism
 d_value = total_op_usd_value / apt_price
