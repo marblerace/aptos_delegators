@@ -1,3 +1,7 @@
+import matplotlib.pyplot as plt
+import pandas as pd
+import os
+from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
@@ -6,6 +10,29 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 import time
+
+# Helper function to plot the data
+def plot_total_delegators():
+    # Load existing data from CSV
+    if os.path.exists("delegators_data.csv"):
+        data = pd.read_csv("delegators_data.csv")
+    else:
+        data = pd.DataFrame(columns=["Date", "Total Delegators"])
+
+    # Plotting
+    plt.figure(figsize=(10, 6))
+    plt.plot(data["Total Delegators"], color="white", linewidth=2)
+    plt.title("Aptos Delegators Over Time", color="white")
+    plt.ylabel("Total Delegators (in Thousands)", color="white")
+    plt.grid(True, color="gray", linestyle="--", linewidth=0.5)
+    plt.xticks([])
+    plt.yticks([45000, 46000, 47000], color="white")
+    plt.gca().set_facecolor("#2E2E2E")
+    plt.gcf().set_facecolor("#2E2E2E")
+
+    # Save the plot
+    plt.savefig("delegators_plot.png", facecolor="#2E2E2E")
+    plt.close()
 
 print("Starting script")
 
@@ -72,13 +99,21 @@ try:
         except (IndexError, ValueError) as e:
             print(f"Could not retrieve or convert data in row {index}: {e}")
 
-    print(f"\nTotal delegators: {total_delegators}")
-    print(f"Total APT delegated: {total_apt_delegated}")
-
     # Write the result to README.md
     with open("README.md", "w") as file:
-        file.write(f"# Delegators Count\n\nTotal Delegators: {total_delegators}\nTotal APT Delegated: {total_apt_delegated}\n")
+        file.write(f"# Delegators Count\n\nTotal Delegators: {total_delegators}\n\nTotal APT Delegated: {total_apt_delegated}\n")
     print("Updated README.md with the total delegators count and APT delegated")
+
+    # Save data to CSV for plotting
+    data = pd.DataFrame([[datetime.now(), total_delegators]], columns=["Date", "Total Delegators"])
+    if os.path.exists("delegators_data.csv"):
+        data.to_csv("delegators_data.csv", mode='a', header=False, index=False)
+    else:
+        data.to_csv("delegators_data.csv", index=False)
+
+    # Generate the plot
+    plot_total_delegators()
+    print("Plot updated successfully.")
 
 except Exception as e:
     print("An error occurred:", e)
