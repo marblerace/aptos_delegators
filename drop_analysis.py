@@ -6,10 +6,12 @@ op_usd_price = 1.368
 total_op_drop = 19411313
 total_op_usd_value = total_op_drop * op_usd_price
 
-# Fetch APT price from Aptos Scan API
+# Fetch APT price from Aptos Scan API with User-Agent header
 url = "https://public-api.aptoscan.com/v1/coins/0x1%3A%3Aaptos_coin%3A%3AAptosCoin"
+headers = {"User-Agent": "Mozilla/5.0"}  # Mimic a browser request
+
 try:
-    response = requests.get(url)
+    response = requests.get(url, headers=headers)
     response.raise_for_status()  # Check if the request was successful
     data = response.json()  # Parse JSON response
 except requests.exceptions.RequestException as e:
