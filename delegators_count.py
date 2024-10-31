@@ -30,26 +30,28 @@ try:
     wait.until(EC.presence_of_all_elements_located((By.XPATH, "//tbody[@class='MuiTableBody-root css-fzvvaf']")))
     print("Table body located")
 
-    # Print page source to verify content load
-    print("Page source:", driver.page_source)
-
     # Find all <a> elements in the tbody which represent each validator row
     validator_rows = driver.find_elements(By.XPATH, "//tbody[@class='MuiTableBody-root css-fzvvaf']//a[@role='row']")
     print(f"Found {len(validator_rows)} validator rows")
 
-    # Extract the third <td> element from each row and sum up the values
+    # Initialize total for summing up the numbers
     total_delegators = 0
-    for row in validator_rows:
+
+    # Loop through each row and debug the structure
+    for index, row in enumerate(validator_rows, start=1):
         try:
-            # Get the third <td> within this row
-            delegators_td = row.find_elements(By.XPATH, "./td[@class='MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-x79huy']")[2]
+            # Print the HTML content of each <a> row to verify structure
+            print(f"\nHTML content of row {index}:\n", row.get_attribute("outerHTML"))
+
+            # Attempt to get the third <td> within this row
+            delegators_td = row.find_elements(By.XPATH, ".//td[@class='MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-x79huy']")[2]
             number = int(delegators_td.text)
             total_delegators += number
-            print(f"Found delegators count: {number}")
+            print(f"Found delegators count in row {index}: {number}")
         except (IndexError, ValueError) as e:
-            print(f"Could not retrieve or convert number in row: {e}")
+            print(f"Could not retrieve or convert number in row {index}: {e}")
 
-    print(f"Total delegators: {total_delegators}")
+    print(f"\nTotal delegators: {total_delegators}")
 
     # Write the result to README.md
     with open("README.md", "w") as file:
