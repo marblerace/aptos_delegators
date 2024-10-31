@@ -27,35 +27,38 @@ try:
     print(f"Opened URL: {url}")
 
     # Wait until table body is loaded
-    wait = WebDriverWait(driver, 30)  # Extending wait time
+    wait = WebDriverWait(driver, 30)
     wait.until(EC.presence_of_element_located((By.XPATH, "//tbody[@class='MuiTableBody-root css-fzvvaf']")))
     print("Table body located")
 
     # Scroll to ensure dynamic content loads
     last_height = driver.execute_script("return document.body.scrollHeight")
     scroll_attempts = 0
-    while scroll_attempts < 5:  # Scroll up to 5 times to load content
+    while scroll_attempts < 5:
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        time.sleep(3)  # Wait to allow loading
+        time.sleep(3)
 
         new_height = driver.execute_script("return document.body.scrollHeight")
-        if new_height == last_height:  # Exit if no more content is loaded
+        if new_height == last_height:
             break
         last_height = new_height
         scroll_attempts += 1
     print("Scrolling complete, checking for rows...")
 
-    # Verify presence of rows in the table body
+    # Find all <a> elements in the tbody which represent each validator row
     validator_rows = driver.find_elements(By.XPATH, "//tbody[@class='MuiTableBody-root css-fzvvaf']//a[@role='row']")
     print(f"Found {len(validator_rows)} validator rows after scrolling")
 
     # Initialize total for summing up the numbers
     total_delegators = 0
 
-    # Loop through each row and retrieve the seventh <td> element
+    # Loop through each row and retrieve HTML to confirm structure
     for index, row in enumerate(validator_rows, start=1):
         print(f"\nProcessing row {index}")
         try:
+            # Print the entire HTML of the <a> element to verify structure
+            print(f"HTML content of row {index}:\n{row.get_attribute('outerHTML')}")
+
             # Get the seventh <td> within this row
             delegators_td = row.find_elements(By.XPATH, "./td[@class='MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-x79huy']")[6]
             number = int(delegators_td.text)
