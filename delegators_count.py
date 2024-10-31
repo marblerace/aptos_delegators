@@ -2,8 +2,9 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
-import time
 
 print("Starting script")
 
@@ -24,26 +25,33 @@ try:
     driver.get(url)
     print(f"Opened URL: {url}")
 
-    # Allow time for the page to load
-    time.sleep(5)
-    print("Waited 5 seconds for page to load")
+    # Allow time for the page to load fully by waiting for the table structure to be present
+    wait = WebDriverWait(driver, 15)
+    wait.until(EC.presence_of_all_elements_located((By.XPATH, "//tbody[@class='MuiTableBody-root css-fzvvaf']")))
+    print("Table body located")
 
-    # Find all elements in the "Delegators" column
-    delegators_elements = driver.find_elements(By.XPATH, "//span[contains(@class, 'delegators')]")
-    print(f"Found {len(delegators_elements)} elements in the 'Delegators' column")
+    # Find all <a> elements in the tbody which represent each validator row
+    validator_rows = driver.find_elements(By.XPATH, "//tbody[@class='MuiTableBody-root css-fzvvaf']/a[@role='row']")
+    print(f"Found {len(validator_rows)} validator rows")
 
-    # Check if any elements were found
-    if not delegators_elements:
-        print("Warning: No elements found in the 'Delegators' column. Check the XPath or page structure.")
-    else:
-        # Extract numbers and sum them up
-        total_delegators = sum(int(element.text) for element in delegators_elements if element.text.isdigit())
-        print(f"Total delegators: {total_delegators}")
+    # Extract the third <td> element from each row and sum up the values
+    total_delegators = 0
+    for row in validator_rows:
+        try:
+            # Get the third <td> within this row
+            delegators_td = row.find_elements(By.XPATH, "./td[@class='MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-x79huy']")[2]
+            number = int(delegators_td.text)
+            total_delegators += number
+            print(f"Found delegators count: {number}")
+        except (IndexError, ValueError) as e:
+            print(f"Could not retrieve or convert number in row: {e}")
 
-        # Write the result to README.md
-        with open("README.md", "w") as file:
-            file.write(f"# Delegators Count\n\nTotal Delegators: {total_delegators}\n")
-        print("Updated README.md with the total delegators count")
+    print(f"Total delegators: {total_delegators}")
+
+    # Write the result to README.md
+    with open("README.md", "w") as file:
+        file.write(f"# Delegators Count\n\nTotal Delegators: {total_delegators}\n")
+    print("Updated README.md with the total delegators count")
 
 except Exception as e:
     print("An error occurred:", e)
