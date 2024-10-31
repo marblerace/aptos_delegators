@@ -3,6 +3,8 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait  # Import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC  # Import EC for conditions
 from webdriver_manager.chrome import ChromeDriverManager
 import time
 
@@ -26,7 +28,7 @@ try:
     
     # Wait for the price element to load and retrieve the price text
     price_element = WebDriverWait(driver, 10).until(
-        lambda x: x.find_element(By.XPATH, "//span[@data-converter-target='price']")
+        EC.presence_of_element_located((By.XPATH, "//span[@data-converter-target='price']"))
     )
     apt_price_text = price_element.text.strip().replace("$", "")
     apt_price = float(apt_price_text)
