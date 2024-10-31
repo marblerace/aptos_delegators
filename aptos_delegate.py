@@ -84,7 +84,7 @@ try:
     plt.gca().axis("off")  # Turn off axes
     plt.gca().set_facecolor("#2E2E2E")
     plt.gcf().set_facecolor("#2E2E2E")
-    plt.savefig("delegators.png", facecolor="#2E2E2E")
+    plt.savefig("delegators_plot.png", facecolor="#2E2E2E")
     plt.close()
     time.sleep(1)  # Delay to ensure plot is saved
 
@@ -106,7 +106,7 @@ try:
         file.write(f"# Delegators Count (APT ${apt_price:.2f})<br><br>\n")
         file.write(f"Total Delegators: {total_delegators}<br>\n")
         file.write(f"Total APT Delegated: {total_apt_delegated}<br><br>\n")
-        file.write(f"![Delegators Plot](delegators.png)<br><br>\n")  # Add plot image reference
+        file.write(f"![Delegators Plot](delegators_plot.png)<br><br>\n")  # Add plot image reference
         file.write(f"**OP received for the third airdrop on 18.09.2023 (price of OP was ${op_usd_price}):**<br>\n")
         file.write(f"Addresses received drop: {len(op_data)}<br>\n")
         file.write(f"Average amount received: {average_op:.2f} (${average_op * op_usd_price:.2f})<br>\n")
