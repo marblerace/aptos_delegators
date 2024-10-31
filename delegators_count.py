@@ -49,27 +49,36 @@ try:
     validator_rows = driver.find_elements(By.XPATH, "//tbody[@class='MuiTableBody-root css-fzvvaf']//a[@role='row']")
     print(f"Found {len(validator_rows)} validator rows after scrolling")
 
-    # Initialize total for summing up the numbers
+    # Initialize totals for summing up the numbers
     total_delegators = 0
+    total_apt_delegated = 0
 
-    # Loop through each row and retrieve the seventh <td> element by index
+    # Loop through each row and retrieve the values by index
     for index, row in enumerate(validator_rows, start=1):
         print(f"\nProcessing row {index}")
         try:
-            # Get the seventh <td> within this row by index, ignoring class names
-            delegators_td = row.find_elements(By.TAG_NAME, "td")[6]  # Accessing by position
-            number = int(delegators_td.text.replace(",", ""))  # Remove commas for large numbers
-            total_delegators += number
-            print(f"Found delegators count in row {index}: {number}")
+            # Get the total APT delegated (two indices before delegators)
+            apt_delegated_td = row.find_elements(By.TAG_NAME, "td")[4]
+            apt_delegated_text = apt_delegated_td.text.split(" ")[0].replace(",", "")
+            apt_delegated = int(apt_delegated_text)
+            total_apt_delegated += apt_delegated
+            print(f"Found APT delegated in row {index}: {apt_delegated}")
+
+            # Get the delegators count (seventh <td>)
+            delegators_td = row.find_elements(By.TAG_NAME, "td")[6]
+            delegators_count = int(delegators_td.text.replace(",", ""))
+            total_delegators += delegators_count
+            print(f"Found delegators count in row {index}: {delegators_count}")
         except (IndexError, ValueError) as e:
-            print(f"Could not retrieve or convert number in row {index}: {e}")
+            print(f"Could not retrieve or convert data in row {index}: {e}")
 
     print(f"\nTotal delegators: {total_delegators}")
+    print(f"Total APT delegated: {total_apt_delegated}")
 
     # Write the result to README.md
     with open("README.md", "w") as file:
-        file.write(f"# Delegators Count\n\nTotal Delegators: {total_delegators}\n")
-    print("Updated README.md with the total delegators count")
+        file.write(f"# Delegators Count\n\nTotal Delegators: {total_delegators}\nTotal APT Delegated: {total_apt_delegated}\n")
+    print("Updated README.md with the total delegators count and APT delegated")
 
 except Exception as e:
     print("An error occurred:", e)
