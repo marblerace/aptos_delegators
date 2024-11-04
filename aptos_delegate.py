@@ -71,21 +71,29 @@ try:
 
     # Fetch the vesting data from CryptoRank
     driver.get("https://cryptorank.io/price/aptos/vesting")
-    WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CLASS_NAME, "sc-56567222-0")))
+    WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CLASS_NAME, "sc-5f77eb9d-0")))
     print("Navigated to CryptoRank vesting page.")
+
+    # Scroll to ensure elements load fully
+    driver.execute_script("window.scrollTo(0, document.body.scrollHeight / 3);")
+    time.sleep(2)  # Wait briefly for elements to load after scroll
 
     # Extract the total vesting amount
     vesting_amount_element = driver.find_element(By.XPATH, "//span[contains(@class, 'sc-56567222-0') and contains(@class, 'fzulHc')]")
     vesting_amount_text = vesting_amount_element.text if vesting_amount_element else ""
     print(f"Raw vesting amount text: {vesting_amount_text}")
 
-    # Extract the unlock percentage
+    # Locate the unlock percentage from the table
     try:
-        unlock_percentage_element = driver.find_element(By.XPATH, "//span[contains(@class, 'sc-56567222-0') and contains(@class, 'ftrvre')]")
-        unlock_percentage_text = unlock_percentage_element.text if unlock_percentage_element else ""
+        # Find the table body, then the third <tr> and its third <td>
+        table_body = driver.find_element(By.XPATH, "//table[@class='sc-5f77eb9d-0 sc-b83f0aca-1 fKSPvD eeiGZr']/tbody")
+        third_row = table_body.find_elements(By.TAG_NAME, "tr")[2]  # third <tr> (0-indexed)
+        unlock_percentage_td = third_row.find_elements(By.TAG_NAME, "td")[2]  # third <td> (0-indexed)
+        unlock_percentage_text = unlock_percentage_td.text if unlock_percentage_td else ""
     except Exception as e:
         unlock_percentage_text = ""
-        print(f"Error finding unlock percentage element: {e}")
+        print(f"Error finding unlock percentage in the table: {e}")
+
     print(f"Raw unlock percentage text: {unlock_percentage_text}")
 
     # Clean and convert vesting amount
@@ -116,6 +124,12 @@ try:
     unlocked_usd = unlocked_apt * apt_price
     print(f"Calculated unlocked APT: {unlocked_apt} APT")
     print(f"Calculated unlocked USD: ${unlocked_usd}")
+
+    # Per delegator values
+    g_value = unlocked_apt / total_delegators if total_delegators > 0 else 0
+    h_value = unlocked_usd / total_delegators if total_delegators > 0 else 0
+    print(f"Per delegator unlocked APT: {g_value}")
+    print(f"Per delegator unlocked USD: ${h_value}")
 
     # Per delegator values
     g_value = unlocked_apt / total_delegators if total_delegators > 0 else 0
