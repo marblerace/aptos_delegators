@@ -74,10 +74,18 @@ try:
     WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CLASS_NAME, "sc-56567222-0")))
     print("Navigated to CryptoRank vesting page.")
 
-    # Extract the total vesting amount and unlock percentage
-    vesting_amount_text = driver.find_element(By.XPATH, "//span[contains(@class, 'sc-56567222-0') and contains(@class, 'fzulHc')]").text
-    unlock_percentage_text = driver.find_element(By.XPATH, "//span[contains(@class, 'sc-56567222-0') and contains(@class, 'ftrvre')]").text
+    # Extract the total vesting amount
+    vesting_amount_element = driver.find_element(By.XPATH, "//span[contains(@class, 'sc-56567222-0') and contains(@class, 'fzulHc')]")
+    vesting_amount_text = vesting_amount_element.text if vesting_amount_element else ""
     print(f"Raw vesting amount text: {vesting_amount_text}")
+
+    # Extract the unlock percentage
+    try:
+        unlock_percentage_element = driver.find_element(By.XPATH, "//span[contains(@class, 'sc-56567222-0') and contains(@class, 'ftrvre')]")
+        unlock_percentage_text = unlock_percentage_element.text if unlock_percentage_element else ""
+    except Exception as e:
+        unlock_percentage_text = ""
+        print(f"Error finding unlock percentage element: {e}")
     print(f"Raw unlock percentage text: {unlock_percentage_text}")
 
     # Clean and convert vesting amount
@@ -93,15 +101,15 @@ try:
         print(f"Converted vesting amount: {vesting_amount} APT")
     except ValueError as e:
         print("Error converting vesting amount:", e)
-        vesting_amount = 0  # Fallback in case of error
+        vesting_amount = 0
 
     # Clean and convert unlock percentage
     try:
-        unlock_percentage = float(unlock_percentage_text.replace("%", "")) / 100
+        unlock_percentage = float(unlock_percentage_text.replace("%", "")) / 100 if unlock_percentage_text else 0
         print(f"Converted unlock percentage: {unlock_percentage}")
     except ValueError as e:
         print("Error converting unlock percentage:", e)
-        unlock_percentage = 0  # Fallback in case of error
+        unlock_percentage = 0
 
     # Calculate unlocked APT and USD values
     unlocked_apt = vesting_amount * unlock_percentage
