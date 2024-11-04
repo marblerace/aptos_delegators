@@ -97,15 +97,14 @@ try:
     print(f"Raw unlock percentage text: {unlock_percentage_text}")
 
     # Clean and convert vesting amount
-    vesting_amount_text = vesting_amount_text.replace("APT ", "").replace("B", "").replace("M", "")
-    print(f"Cleaned vesting amount text: {vesting_amount_text}")
+    vesting_amount_text_cleaned = vesting_amount_text.replace("APT ", "")
     try:
-        if "B" in vesting_amount_text:
-            vesting_amount = float(vesting_amount_text) * 1_000_000_000
-        elif "M" in vesting_amount_text:
-            vesting_amount = float(vesting_amount_text) * 1_000_000
+        if "B" in vesting_amount_text_cleaned:
+            vesting_amount = float(vesting_amount_text_cleaned.replace("B", "")) * 1_000_000_000
+        elif "M" in vesting_amount_text_cleaned:
+            vesting_amount = float(vesting_amount_text_cleaned.replace("M", "")) * 1_000_000
         else:
-            vesting_amount = float(vesting_amount_text)
+            vesting_amount = float(vesting_amount_text_cleaned)
         print(f"Converted vesting amount: {vesting_amount} APT")
     except ValueError as e:
         print("Error converting vesting amount:", e)
@@ -124,6 +123,12 @@ try:
     unlocked_usd = unlocked_apt * apt_price
     print(f"Calculated unlocked APT: {unlocked_apt} APT")
     print(f"Calculated unlocked USD: ${unlocked_usd}")
+
+    # Per delegator values
+    g_value = unlocked_apt / total_delegators if total_delegators > 0 else 0
+    h_value = unlocked_usd / total_delegators if total_delegators > 0 else 0
+    print(f"Per delegator unlocked APT: {g_value}")
+    print(f"Per delegator unlocked USD: ${h_value}")
 
     # Per delegator values
     g_value = unlocked_apt / total_delegators if total_delegators > 0 else 0
