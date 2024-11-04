@@ -10,5 +10,5 @@ Total drop distribution: 19411313 ($26554676.18)<br><br>
 If Aptos Foundation team spent the same amount for the delegation airdrop as Optimism Foundation team ($26554676.18),<br>
 they will spend 3199358.58 APT for this airdrop.<br>
 With this logic, every APT delegate will receive on average: 66.55 APT ($552.34)<br><br>
-Currently Foundation team has unlocked: 0.04 APT ($0.31)<br>
-If Aptos Foundation team spent this amount for the delegation airdrop, every APT delegate will receive : 0.00 APT ($0.00)<br>
+Currently Foundation team has unlocked: 36848000.00 APT ($305838400.00)<br>
+If Aptos Foundation team spent this amount for the delegation airdrop, every APT delegate will receive : 766.44 APT ($6361.43)<br>
