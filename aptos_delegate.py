@@ -69,6 +69,30 @@ try:
         except (IndexError, ValueError) as e:
             print("Error processing row data:", e)
 
+    # 3. Fetch Foundation data from CryptoRank
+    driver.get("https://cryptorank.io/price/aptos/vesting")
+    WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CLASS_NAME, "sc-56567222-0")))
+
+    # Extract the total vesting amount and unlock percentage
+    vesting_amount_text = driver.find_element(By.XPATH, "//span[contains(@class, 'sc-56567222-0') and contains(@class, 'fzulHc')]").text
+    unlock_percentage_text = driver.find_element(By.XPATH, "//span[contains(@class, 'sc-56567222-0') and contains(@class, 'ftrvre')]").text
+
+    # Convert vesting amount and unlock percentage
+    if "B" in vesting_amount_text:
+        vesting_amount = float(vesting_amount_text.replace("B", "")) * 1_000_000_000
+    elif "M" in vesting_amount_text:
+        vesting_amount = float(vesting_amount_text.replace("M", "")) * 1_000_000
+    else:
+        vesting_amount = float(vesting_amount_text)
+    
+    unlock_percentage = float(unlock_percentage_text.replace("%", "")) / 100
+    unlocked_apt = vesting_amount * unlock_percentage
+    unlocked_usd = unlocked_apt * apt_price
+
+    # Per delegator values
+    g_value = unlocked_apt / total_delegators
+    h_value = unlocked_usd / total_delegators
+
     # Append data to CSV and generate plot
     data = pd.DataFrame([[datetime.now(), total_delegators, total_apt_delegated]], columns=["Date", "Total Delegators", "Total APT Delegated"])
     if os.path.exists("delegators_data.csv"):
@@ -84,11 +108,10 @@ try:
     plt.gca().axis("off")  # Turn off axes
     plt.gca().set_facecolor("#2E2E2E")
     plt.gcf().set_facecolor("#2E2E2E")
-    plt.savefig("delegators_plot.png", facecolor="#2E2E2E")
+    plt.savefig("delegators.png", facecolor="#2E2E2E")
     plt.close()
-    time.sleep(1)  # Delay to ensure plot is saved
 
-    # 3. Analyze OP airdrop data
+    # 4. Analyze OP airdrop data
     op_data = pd.read_csv("op_airdrop_3_simple_list.csv")
     op_usd_price = 1.368
     total_op_drop = 19411313
@@ -106,14 +129,17 @@ try:
         file.write(f"# Delegators Count (APT ${apt_price:.2f})<br><br>\n")
         file.write(f"Total Delegators: {total_delegators}<br>\n")
         file.write(f"Total APT Delegated: {total_apt_delegated}<br><br>\n")
-        file.write(f"![Delegators Plot](delegators_plot.png)<br><br>\n")  # Add plot image reference
+        file.write(f"![Delegators Plot](delegators.png)<br><br>\n")
         file.write(f"**OP received for the third airdrop on 18.09.2023 (price of OP was ${op_usd_price}):**<br>\n")
         file.write(f"Addresses received drop: {len(op_data)}<br>\n")
         file.write(f"Average amount received: {average_op:.2f} (${average_op * op_usd_price:.2f})<br>\n")
         file.write(f"Median amount received: {median_op:.2f} (${median_op * op_usd_price:.2f})<br>\n")
         file.write(f"Total drop distribution: {total_op_drop} (${total_op_usd_value:.2f})<br><br>\n")
-        file.write(f"If Aptos Foundation spent the same amount for the delegation airdrop as Optimism Foundation team (${total_op_usd_value:.2f}),they will spend {d_value:.2f} APT for this airdrop.<br>\n")
-        file.write(f"With this logic, every APT delegate will receive on average: {f_value:.2f} APT (${e_value:.2f})<br>\n")
+        file.write(f"If Aptos Foundation team spent the same amount for the delegation airdrop as Optimism Foundation team (${total_op_usd_value:.2f}),<br>\n")
+        file.write(f"they will spend {d_value:.2f} APT for this airdrop.<br>\n")
+        file.write(f"With this logic, every APT delegate will receive on average: {f_value:.2f} APT (${e_value:.2f})<br><br>\n")
+        file.write(f"Currently Foundation team has unlocked: {unlocked_apt:.2f} APT (${unlocked_usd:.2f})<br>\n")
+        file.write(f"If Aptos Foundation team spent this amount for the delegation airdrop, every APT delegate will receive : {g_value:.2f} APT (${h_value:.2f})<br>\n")
 
 except Exception as e:
     print("An error occurred:", e)
