@@ -1,7 +1,7 @@
 # Delegators Count (APT $8.31)<br><br>
 Total Delegators: 48068<br>
 Total APT Delegated: 323067293<br><br>
-![Delegators Plot](delegators.png)<br><br>
+![Delegators Plot](delegators_plot.png)<br><br>
 **OP received for the third airdrop on 18.09.2023 (price of OP was $1.368):**<br>
 Addresses received drop: 31870<br>
 Average amount received: 609.08 ($833.22)<br>
