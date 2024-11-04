@@ -69,7 +69,7 @@ try:
         except (IndexError, ValueError) as e:
             print("Error processing row data:", e)
 
-    # 3. Fetch Foundation data from CryptoRank
+    # Fetch the vesting data from CryptoRank
     driver.get("https://cryptorank.io/price/aptos/vesting")
     WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CLASS_NAME, "sc-56567222-0")))
 
@@ -77,15 +77,26 @@ try:
     vesting_amount_text = driver.find_element(By.XPATH, "//span[contains(@class, 'sc-56567222-0') and contains(@class, 'fzulHc')]").text
     unlock_percentage_text = driver.find_element(By.XPATH, "//span[contains(@class, 'sc-56567222-0') and contains(@class, 'ftrvre')]").text
 
-    # Convert vesting amount and unlock percentage
-    if "B" in vesting_amount_text:
-        vesting_amount = float(vesting_amount_text.replace("B", "")) * 1_000_000_000
-    elif "M" in vesting_amount_text:
-        vesting_amount = float(vesting_amount_text.replace("M", "")) * 1_000_000
-    else:
-        vesting_amount = float(vesting_amount_text)
-    
-    unlock_percentage = float(unlock_percentage_text.replace("%", "")) / 100
+    # Clean and convert vesting amount
+    vesting_amount_text = vesting_amount_text.replace("APT ", "").replace("B", "").replace("M", "")
+    try:
+        if "B" in vesting_amount_text:
+            vesting_amount = float(vesting_amount_text) * 1_000_000_000
+        elif "M" in vesting_amount_text:
+            vesting_amount = float(vesting_amount_text) * 1_000_000
+        else:
+            vesting_amount = float(vesting_amount_text)
+    except ValueError as e:
+        print("Error converting vesting amount:", e)
+        vesting_amount = 0  # Fallback in case of error
+
+    # Clean and convert unlock percentage
+    try:
+        unlock_percentage = float(unlock_percentage_text.replace("%", "")) / 100
+    except ValueError as e:
+        print("Error converting unlock percentage:", e)
+        unlock_percentage = 0  # Fallback in case of error
+
     unlocked_apt = vesting_amount * unlock_percentage
     unlocked_usd = unlocked_apt * apt_price
 
