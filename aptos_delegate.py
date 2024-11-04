@@ -119,7 +119,7 @@ try:
     plt.gca().axis("off")  # Turn off axes
     plt.gca().set_facecolor("#2E2E2E")
     plt.gcf().set_facecolor("#2E2E2E")
-    plt.savefig("delegators.png", facecolor="#2E2E2E")
+    plt.savefig("delegators_png.png", facecolor="#2E2E2E")
     plt.close()
 
     # 4. Analyze OP airdrop data
