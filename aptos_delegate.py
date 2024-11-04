@@ -14,7 +14,7 @@ from datetime import datetime
 
 print("Starting script")
 
-# 1. Fetch current APT price from Aptos Scan API
+# Fetch current APT price from Aptos Scan API
 def fetch_apt_price():
     url = "https://public-api.aptoscan.com/v1/coins/0x1%3A%3Aaptos_coin%3A%3AAptosCoin"
     headers = {"User-Agent": "Mozilla/5.0"}
@@ -36,7 +36,7 @@ def fetch_apt_price():
 apt_price = fetch_apt_price()
 
 try:
-    # 2. Configure Selenium and scrape delegators and delegated amount
+    # Configure Selenium and scrape delegators and delegated amount
     chrome_options = Options()
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
@@ -72,13 +72,17 @@ try:
     # Fetch the vesting data from CryptoRank
     driver.get("https://cryptorank.io/price/aptos/vesting")
     WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CLASS_NAME, "sc-56567222-0")))
+    print("Navigated to CryptoRank vesting page.")
 
     # Extract the total vesting amount and unlock percentage
     vesting_amount_text = driver.find_element(By.XPATH, "//span[contains(@class, 'sc-56567222-0') and contains(@class, 'fzulHc')]").text
     unlock_percentage_text = driver.find_element(By.XPATH, "//span[contains(@class, 'sc-56567222-0') and contains(@class, 'ftrvre')]").text
+    print(f"Raw vesting amount text: {vesting_amount_text}")
+    print(f"Raw unlock percentage text: {unlock_percentage_text}")
 
     # Clean and convert vesting amount
     vesting_amount_text = vesting_amount_text.replace("APT ", "").replace("B", "").replace("M", "")
+    print(f"Cleaned vesting amount text: {vesting_amount_text}")
     try:
         if "B" in vesting_amount_text:
             vesting_amount = float(vesting_amount_text) * 1_000_000_000
@@ -86,6 +90,7 @@ try:
             vesting_amount = float(vesting_amount_text) * 1_000_000
         else:
             vesting_amount = float(vesting_amount_text)
+        print(f"Converted vesting amount: {vesting_amount} APT")
     except ValueError as e:
         print("Error converting vesting amount:", e)
         vesting_amount = 0  # Fallback in case of error
@@ -93,12 +98,22 @@ try:
     # Clean and convert unlock percentage
     try:
         unlock_percentage = float(unlock_percentage_text.replace("%", "")) / 100
+        print(f"Converted unlock percentage: {unlock_percentage}")
     except ValueError as e:
         print("Error converting unlock percentage:", e)
         unlock_percentage = 0  # Fallback in case of error
 
+    # Calculate unlocked APT and USD values
     unlocked_apt = vesting_amount * unlock_percentage
     unlocked_usd = unlocked_apt * apt_price
+    print(f"Calculated unlocked APT: {unlocked_apt} APT")
+    print(f"Calculated unlocked USD: ${unlocked_usd}")
+
+    # Per delegator values
+    g_value = unlocked_apt / total_delegators if total_delegators > 0 else 0
+    h_value = unlocked_usd / total_delegators if total_delegators > 0 else 0
+    print(f"Per delegator unlocked APT: {g_value}")
+    print(f"Per delegator unlocked USD: ${h_value}")
 
     # Per delegator values
     g_value = unlocked_apt / total_delegators
@@ -119,10 +134,10 @@ try:
     plt.gca().axis("off")  # Turn off axes
     plt.gca().set_facecolor("#2E2E2E")
     plt.gcf().set_facecolor("#2E2E2E")
-    plt.savefig("delegators_png.png", facecolor="#2E2E2E")
+    plt.savefig("delegators_plot.png", facecolor="#2E2E2E")
     plt.close()
 
-    # 4. Analyze OP airdrop data
+    # Analyze OP airdrop data
     op_data = pd.read_csv("op_airdrop_3_simple_list.csv")
     op_usd_price = 1.368
     total_op_drop = 19411313
@@ -140,7 +155,7 @@ try:
         file.write(f"# Delegators Count (APT ${apt_price:.2f})<br><br>\n")
         file.write(f"Total Delegators: {total_delegators}<br>\n")
         file.write(f"Total APT Delegated: {total_apt_delegated}<br><br>\n")
-        file.write(f"![Delegators Plot](delegators.png)<br><br>\n")
+        file.write(f"![Delegators Plot](delegators_plot.png)<br><br>\n")
         file.write(f"**OP received for the third airdrop on 18.09.2023 (price of OP was ${op_usd_price}):**<br>\n")
         file.write(f"Addresses received drop: {len(op_data)}<br>\n")
         file.write(f"Average amount received: {average_op:.2f} (${average_op * op_usd_price:.2f})<br>\n")
