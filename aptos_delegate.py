@@ -153,15 +153,27 @@ try:
     else:
         data.to_csv("delegators_data.csv", index=False)
 
-    # Read data and plot
+    # Read data from CSV
     if os.path.exists("delegators_data.csv"):
         data = pd.read_csv("delegators_data.csv")
+
+    # Determine y-axis range and intervals
+    min_delegators = int(data["Total Delegators"].min() // 500 * 500)  # Round down to nearest 500
+    max_delegators = int(data["Total Delegators"].max() // 500 * 500 + 500)  # Round up to nearest 500
+    y_ticks = list(range(min_delegators, max_delegators + 1, 500))
+
+    # Create the plot
     plt.figure(figsize=(10, 6))
     plt.plot(data["Total Delegators"], color="white", linewidth=2)
-    plt.gca().axis("off")  # Turn off axes
+
+    # Add y-axis labels for every 500 increments
+    plt.yticks(y_ticks, color="white")
     plt.gca().set_facecolor("#2E2E2E")
     plt.gcf().set_facecolor("#2E2E2E")
-    plt.savefig("delegators_plot.png", facecolor="#2E2E2E")
+    plt.gca().xaxis.set_visible(False)  # Hide the x-axis
+
+    # Save the plot
+    plt.savefig("delegators.png", facecolor="#2E2E2E")
     plt.close()
 
     # Analyze OP airdrop data
