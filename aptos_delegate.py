@@ -146,11 +146,15 @@ try:
     g_value = unlocked_apt / total_delegators
     h_value = unlocked_usd / total_delegators
 
-    # Append data to CSV and generate plot
+    # Prepare data for CSV
     data = pd.DataFrame([[datetime.now(), total_delegators, total_apt_delegated]], columns=["Date", "Total Delegators", "Total APT Delegated"])
+
+    # Check if the file exists to determine the writing mode
     if os.path.exists("delegators_data.csv"):
+        # Append to CSV in a controlled format, avoiding extra columns or rows
         data.to_csv("delegators_data.csv", mode='a', header=False, index=False)
     else:
+        # Write header only if file doesn't exist
         data.to_csv("delegators_data.csv", index=False)
 
     # Read data from CSV
