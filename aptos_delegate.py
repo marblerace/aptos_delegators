@@ -173,7 +173,7 @@ try:
     plt.gca().xaxis.set_visible(False)  # Hide the x-axis
 
     # Save the plot
-    plt.savefig("delegators.png", facecolor="#2E2E2E")
+    plt.savefig("delegators_plot.png", facecolor="#2E2E2E")
     plt.close()
 
     # Analyze OP airdrop data
