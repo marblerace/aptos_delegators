@@ -146,15 +146,16 @@ try:
     g_value = unlocked_apt / total_delegators
     h_value = unlocked_usd / total_delegators
 
-    # Prepare data for CSV
+    # Prepare the new data row as a DataFrame
     data = pd.DataFrame([[datetime.now(), total_delegators, total_apt_delegated]], columns=["Date", "Total Delegators", "Total APT Delegated"])
 
-    # Check if the file exists to determine the writing mode
+    # Write data to CSV, ensuring a proper newline for each append
     if os.path.exists("delegators_data.csv"):
-        # Append to CSV in a controlled format, avoiding extra columns or rows
-        data.to_csv("delegators_data.csv", mode='a', header=False, index=False)
+        with open("delegators_data.csv", mode='a') as file:
+            # Append each row with a newline explicitly
+            data.to_csv(file, header=False, index=False, line_terminator='\n')
     else:
-        # Write header only if file doesn't exist
+        # Write header if the file is new
         data.to_csv("delegators_data.csv", index=False)
 
     # Read data from CSV
