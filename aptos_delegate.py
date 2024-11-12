@@ -45,7 +45,7 @@ try:
 
     url = "https://explorer.aptoslabs.com/validators/delegation?network=mainnet"
     driver.get(url)
-    WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.XPATH, "//tbody[@class='MuiTableBody-root css-148otff']")))
+    WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.XPATH, "//tbody[@class='MuiTableBody-root css-1013deo']")))
 
     # Scroll to load all rows
     last_height = driver.execute_script("return document.body.scrollHeight")
@@ -58,7 +58,7 @@ try:
         last_height = new_height
 
     # Extract delegators and delegated data
-    validator_rows = driver.find_elements(By.XPATH, "//tbody[@class='MuiTableBody-root css-148otff']//a[@role='row']")
+    validator_rows = driver.find_elements(By.XPATH, "//tbody[@class='MuiTableBody-root css-1013deo']//a[@role='row']")
     total_delegators, total_apt_delegated = 0, 0
     for row in validator_rows:
         try:
