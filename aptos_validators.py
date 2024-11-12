@@ -69,18 +69,22 @@ try:
 
         # Find all <p> elements with the class "MuiTypography-root MuiTypography-body1 ..."
         p_elements = driver.find_elements(By.XPATH, "//p[contains(@class, 'MuiTypography-root') and contains(@class, 'MuiTypography-body1')]")
-        
+        print(f"Found {len(p_elements)} <p> elements for validator {i + 1}")
+
         # Check if there are enough <p> elements to retrieve the prelast one
         if len(p_elements) >= 2:
             prelast_p = p_elements[-2]  # Select the second-to-last <p> element
             span_elements = prelast_p.find_elements(By.TAG_NAME, "span")
             
-            # Print the text of all <span> elements inside the prelast <p>
-            print(f"Validator {i + 1} spans:")
-            for span in span_elements:
-                print(span.text)
+            # Print the text of all <span> elements within the prelast <p>, if any
+            if span_elements:
+                print(f"Validator {i + 1} spans:")
+                for span in span_elements:
+                    print(span.text or "[No text in this span]")
+            else:
+                print(f"Validator {i + 1}: No <span> elements found in the prelast <p> element.")
         else:
-            print(f"Validator {i + 1}: Not enough <p> elements found.")
+            print(f"Validator {i + 1}: Not enough <p> elements found to locate the prelast one.")
 
         # Update validators.txt to replace the URL with confirmation that spans were processed
         urls[i] = f"processed validator {i}\n"
