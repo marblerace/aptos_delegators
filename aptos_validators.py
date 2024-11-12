@@ -6,6 +6,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 import time
+import re
 
 # Initialize Chrome driver with options
 chrome_options = Options()
@@ -76,8 +77,8 @@ try:
         unlock_time = None
 
         for span in span_elements:
-            # Check if the span text contains the unlock time format (e.g., '9d 11h 54m 15s')
-            if any(unit in span.text for unit in ["d", "h", "m", "s"]):  # Look for time format
+            # Check if the span text contains a pattern for time like '9d 11h 54m 15s'
+            if re.match(r"\d+d \d+h \d+m \d+s|\d+d \d+h \d+m|\d+h \d+m \d+s|\d+h \d+m", span.text):
                 unlock_time = span.text
                 break  # Stop once the time string is found
 
