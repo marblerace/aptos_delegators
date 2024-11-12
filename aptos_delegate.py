@@ -71,8 +71,8 @@ try:
     tbody = table_body
     print("Tbody found:", "Yes" if tbody else "No")
 
-    # Extract delegator rows within tbody with updated class
-    validator_rows = tbody.find_elements(By.XPATH, ".//a[@class='MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways MuiTableRow-root css-1dl26i8']")
+    # Extract delegator rows within tbody using role attribute
+    validator_rows = tbody.find_elements(By.XPATH, ".//a[@role='row']")
     print(f"Found {len(validator_rows)} validator rows in tbody.")
 
     # Scroll to load all rows
