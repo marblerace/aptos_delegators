@@ -32,16 +32,21 @@ try:
             break
         last_height = new_height
 
-    # Now retrieve all validator rows
-    tbody = driver.find_element(By.XPATH, "//table//tbody")
-    validator_rows = tbody.find_elements(By.XPATH, ".//a[@role='row']")
-    print(f"Found {len(validator_rows)} validator rows in tbody.")
+    # Loop to handle each validator link
+    i = 1
+    while True:
+        # Refresh validator rows after each main page load
+        tbody = driver.find_element(By.XPATH, "//table//tbody")
+        validator_rows = tbody.find_elements(By.XPATH, ".//a[@role='row']")
 
-    # Loop through each validator row to get href link and open it
-    for i, row in enumerate(validator_rows, start=1):
+        if i > len(validator_rows):
+            print("Processed all validators.")
+            break
+
+        row = validator_rows[i - 1]
         href = row.get_attribute("href")
         print(f"Opening validator {i} URL: {href}")
-
+        
         # Open each validator link
         driver.get(href)
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//img[@alt='Identicon']")))
@@ -53,7 +58,8 @@ try:
         else:
             print(f"Validator {i}: Second Identicon not found")
 
-        # Return to the main page for the next validator
+        # Increment validator index and return to the main page for the next validator
+        i += 1
         driver.get(url)
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//table//tbody")))
 
