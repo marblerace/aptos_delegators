@@ -65,31 +65,28 @@ try:
         
         # Open each validator link
         driver.get(url)
-        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//img[@alt='Identicon']")))
+        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//p[contains(@class, 'MuiTypography-root')]")))
 
-        # Locate Identicon images and confirm if the second one is found
-        identicon_elements = driver.find_elements(By.XPATH, "//img[@alt='Identicon']")
-        if len(identicon_elements) >= 2:
-            print(f"Identicon found for validator {i + 1}")
-
-            # Step 1: Navigate to the outermost <div class="MuiStack-root">
-            outer_stack_div = identicon_elements[1].find_element(By.XPATH, "./ancestor::div[contains(@class, 'MuiStack-root')]")
-
-            # Step 2: Drill down to the last child <div class="MuiStack-root"> inside the hierarchy
-            nested_div = outer_stack_div.find_element(By.XPATH, ".//div[contains(@class, 'MuiStack-root')][last()]")
-
-            # Step 3: Retrieve and print all <span> elements within the last nested div
-            span_elements = nested_div.find_elements(By.XPATH, ".//span")
+        # Find all <p> elements with the class "MuiTypography-root MuiTypography-body1 ..."
+        p_elements = driver.find_elements(By.XPATH, "//p[contains(@class, 'MuiTypography-root') and contains(@class, 'MuiTypography-body1')]")
+        
+        # Check if there are enough <p> elements to retrieve the prelast one
+        if len(p_elements) >= 2:
+            prelast_p = p_elements[-2]  # Select the second-to-last <p> element
+            span_elements = prelast_p.find_elements(By.TAG_NAME, "span")
+            
+            # Print the text of all <span> elements inside the prelast <p>
             print(f"Validator {i + 1} spans:")
             for span in span_elements:
                 print(span.text)
         else:
-            print(f"Validator {i + 1}: Second Identicon not found")
+            print(f"Validator {i + 1}: Not enough <p> elements found.")
 
-        # Update validators.txt to replace the URL with confirmation that Identicon was processed
+        # Update validators.txt to replace the URL with confirmation that spans were processed
         urls[i] = f"processed validator {i}\n"
         with open(validators_file, "w") as file:
             file.writelines(urls)
+
 
 finally:
     driver.quit()
