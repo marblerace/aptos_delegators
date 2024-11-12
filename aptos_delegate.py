@@ -45,20 +45,27 @@ try:
 
     url = "https://explorer.aptoslabs.com/validators/delegation?network=mainnet"
     driver.get(url)
+    print("Page loaded, waiting for table body element to be present.")
+    
     WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.XPATH, "//tbody[@class='MuiTableBody-root css-fzvvaf']")))
+    print("Table body element located.")
 
     # Scroll to load all rows
     last_height = driver.execute_script("return document.body.scrollHeight")
-    for _ in range(5):
+    for attempt in range(5):
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        time.sleep(3)
+        time.sleep(5)  # Increased wait time
         new_height = driver.execute_script("return document.body.scrollHeight")
         if new_height == last_height:
+            print("Reached bottom of the page.")
             break
         last_height = new_height
 
     # Extract delegators and delegated data
     validator_rows = driver.find_elements(By.XPATH, "//tbody[@class='MuiTableBody-root css-fzvvaf']//a[@role='row']")
+    print(f"Found {len(validator_rows)} validator rows after scrolling.")
+
+    # Initialize totals
     total_delegators, total_apt_delegated = 0, 0
     for row in validator_rows:
         try:
