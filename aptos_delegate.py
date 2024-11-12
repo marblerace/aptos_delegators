@@ -67,23 +67,19 @@ try:
     ))
     print("Table body element located.")
 
-    # Find the table
-    table = driver.find_element(By.XPATH, "//table[contains(@class, 'MuiTable-root')]")
-    print("Table found:", "Yes" if table else "No")
-
     # Find tbody within the table
-    tbody = table.find_element(By.TAG_NAME, "tbody")
+    tbody = table_body
     print("Tbody found:", "Yes" if tbody else "No")
 
-    # Extract delegator rows within tbody
-    validator_rows = tbody.find_elements(By.XPATH, ".//a[@role='row']")
+    # Extract delegator rows within tbody with updated class
+    validator_rows = tbody.find_elements(By.XPATH, ".//a[@class='MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways MuiTableRow-root css-1dl26i8']")
     print(f"Found {len(validator_rows)} validator rows in tbody.")
 
     # Scroll to load all rows
     last_height = driver.execute_script("return document.body.scrollHeight")
     for attempt in range(5):
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        time.sleep(5)  # Increased wait time
+        time.sleep(5)
         new_height = driver.execute_script("return document.body.scrollHeight")
         if new_height == last_height:
             print("Reached bottom of the page.")
@@ -105,6 +101,13 @@ try:
 
         except (IndexError, ValueError) as e:
             print(f"Error processing row {idx} data:", e)
+
+    # Check for zero total_delegators to avoid division by zero
+    if total_delegators == 0:
+        print("No delegators found, exiting to avoid division by zero.")
+    else:
+        print(f"Total Delegators: {total_delegators}")
+        print(f"Total APT Delegated: {total_apt_delegated}")
 
     # Fetch the vesting data from CryptoRank
     driver.get("https://cryptorank.io/price/aptos/vesting")
