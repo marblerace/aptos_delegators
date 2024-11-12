@@ -15,6 +15,7 @@ chrome_options.add_argument("--disable-dev-shm-usage")
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
 
 url = "https://explorer.aptoslabs.com/validators/delegation?network=mainnet"
+validators_file = "validators.txt"
 
 try:
     driver.get(url)
@@ -32,36 +33,40 @@ try:
             break
         last_height = new_height
 
-    # Loop to handle each validator link
-    i = 1
-    while True:
-        # Refresh validator rows after each main page load
-        tbody = driver.find_element(By.XPATH, "//table//tbody")
-        validator_rows = tbody.find_elements(By.XPATH, ".//a[@role='row']")
+    # Locate tbody and find all validator row elements with href attribute
+    tbody = driver.find_element(By.XPATH, "//table//tbody")
+    validator_rows = tbody.find_elements(By.XPATH, ".//a[@role='row']")
+    print(f"Found {len(validator_rows)} validator rows in tbody.")
 
-        if i > len(validator_rows):
-            print("Processed all validators.")
-            break
+    # Step 1: Write all validator URLs to a txt file
+    with open(validators_file, "w") as file:
+        for row in validator_rows:
+            href = row.get_attribute("href")
+            file.write(f"{href}\n")
+    print(f"Saved {len(validator_rows)} URLs to {validators_file}")
 
-        row = validator_rows[i - 1]
-        href = row.get_attribute("href")
-        print(f"Opening validator {i} URL: {href}")
+    # Step 2: Read URLs from txt file, process each, and update file with got[i] marks
+    with open(validators_file, "r") as file:
+        urls = file.readlines()
+
+    # Process each validator link from the file
+    for i, url in enumerate(urls):
+        url = url.strip()
+        print(f"Opening validator {i + 1} URL: {url}")
         
         # Open each validator link
-        driver.get(href)
+        driver.get(url)
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//img[@alt='Identicon']")))
 
-        # Locate Identicon images and print if the second one is found
+        # Locate Identicon images and confirm if the second one is found
         identicon_elements = driver.find_elements(By.XPATH, "//img[@alt='Identicon']")
         if len(identicon_elements) >= 2:
-            print(f"Got Identicon for validator {i}")
-        else:
-            print(f"Validator {i}: Second Identicon not found")
+            print(f"Got Identicon for validator {i + 1}")
 
-        # Increment validator index and return to the main page for the next validator
-        i += 1
-        driver.get(url)
-        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//table//tbody")))
+        # Update validators.txt to replace the URL with got[i]
+        urls[i] = f"got[{i}]\n"
+        with open(validators_file, "w") as file:
+            file.writelines(urls)
 
 finally:
     driver.quit()
