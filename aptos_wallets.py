@@ -1,6 +1,7 @@
 import requests
 import re
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
+import time
 
 validators_file = "validators.txt"
 wallets_file = "wallets.txt"
@@ -22,32 +23,41 @@ def load_validators():
     return validator_unlock_dates
 
 def fetch_transactions(wallet_address):
-    url = f"https://public-api.aptoscan.com/v1/accounts/{wallet_address}/coin-transfers"
-    headers = {
-        "accept": "application/json",
-        "User-Agent": "Mozilla/5.0"
-    }
+    transactions = []
+    page = 1
+    
+    while True:
+        url = f"https://public-api.aptoscan.com/v1/accounts/{wallet_address}/coin-transfers?page={page}"
+        headers = {
+            "accept": "application/json",
+            "User-Agent": "Mozilla/5.0"
+        }
 
-    try:
-        response = requests.get(url, headers=headers)
-        response.raise_for_status()
-        transactions_data = response.json()
+        try:
+            response = requests.get(url, headers=headers)
+            response.raise_for_status()
+            transactions_data = response.json()
+            
+            # Exit the loop if no transactions are found on this page
+            if not transactions_data.get("data", {}).get("list_trans"):
+                break
 
-        if transactions_data.get("success") and "data" in transactions_data:
-            return transactions_data["data"].get("list_trans", [])
-        else:
-            print("Unexpected structure of transactions:", transactions_data)
-            return None
+            transactions.extend(transactions_data["data"]["list_trans"])
+            page += 1  # Move to the next page
 
-    except requests.exceptions.HTTPError as e:
-        print(f"HTTP error occurred: {e}")
-    except requests.exceptions.RequestException as e:
-        print(f"Error fetching transactions: {e}")
+        except requests.exceptions.HTTPError as e:
+            print(f"HTTP error occurred: {e}")
+            break
+        except requests.exceptions.RequestException as e:
+            print(f"Error fetching transactions: {e}")
+            break
+
+    return transactions
 
 # Process each wallet to check for delegations to validators
 def process_wallets():
     validator_unlock_dates = load_validators()
-    delegation_groups = {}
+    delegation_groups = {}  # To group wallet addresses by validator and unlock date
 
     try:
         with open(wallets_file, "r") as wallet_file:
@@ -56,7 +66,7 @@ def process_wallets():
                 print(f"Processing wallet {line_index}: {wallet}")
                 transactions = fetch_transactions(wallet)
                 
-                if transactions is None:
+                if not transactions:
                     print(f"No transactions found for wallet {wallet}")
                     continue
 
@@ -67,12 +77,13 @@ def process_wallets():
                         unlock_date = validator_unlock_dates[send_to]
                         print(f"Found delegation transaction to validator {send_to} for wallet {wallet}")
 
+                        # Organize wallets by validator and unlock date
                         if (send_to, unlock_date) not in delegation_groups:
                             delegation_groups[(send_to, unlock_date)] = []
                         delegation_groups[(send_to, unlock_date)].append((line_index, wallet))
 
                         found_validator = True
-                        break
+                        break  # Stop once a matching transaction is found
 
                 if not found_validator:
                     print(f"No matching validator transaction found for wallet {wallet}")
@@ -86,12 +97,14 @@ def process_wallets():
                 formatted_date = unlock_date.strftime("%d/%m/%Y %H:%M")
                 result_file.write(f"Delegated to {validator}. Unlock on: {formatted_date}\n")
                 
+                # Write each wallet with its index
                 for line_index, wallet in wallets:
                     result_file.write(f"({line_index}) {wallet}\n")
                 
-                result_file.write("\n\n\n")
+                result_file.write("\n\n\n")  # Add 3 empty lines after each group
 
     except FileNotFoundError:
         print(f"{wallets_file} not found. Please ensure this file exists.")
 
+# Run the script
 process_wallets()
