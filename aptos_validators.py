@@ -29,7 +29,7 @@ try:
     # Loop through each validator row to get href link and open it
     for i, row in enumerate(validator_rows, start=1):
         href = row.get_attribute("href")
-        full_url = f"https://explorer.aptoslabs.com{href}"
+        full_url = href
         print(f"Opening validator {i} URL: {full_url}")
         
         # Open each validator link
