@@ -9,8 +9,8 @@ import requests
 import pandas as pd
 import matplotlib.pyplot as plt
 import time
-from datetime import datetime
 import os
+from datetime import datetime
 
 print("Starting script")
 
@@ -32,20 +32,6 @@ def fetch_apt_price():
         print("Error fetching data from Aptos Scan API:", e)
         return 0.0
 
-# Retry mechanism for Selenium actions
-def retry_action(driver, action, retries=3, wait_time=5):
-    attempt = 0
-    while attempt < retries:
-        try:
-            result = action()
-            print(f"Attempt {attempt + 1} succeeded.")
-            return result
-        except Exception as e:
-            print(f"Attempt {attempt + 1} failed: {e}")
-            time.sleep(wait_time)
-            attempt += 1
-    raise Exception(f"Failed to complete action after {retries} attempts.")
-
 # Fetch the current APT price
 apt_price = fetch_apt_price()
 
@@ -59,55 +45,29 @@ try:
 
     url = "https://explorer.aptoslabs.com/validators/delegation?network=mainnet"
     driver.get(url)
-    print("Page loaded, waiting for table body element to be present.")
-
-    # Retry locating the table body
-    table_body = retry_action(driver, lambda: WebDriverWait(driver, 30).until(
-        EC.presence_of_element_located((By.XPATH, "//tbody[@class='MuiTableBody-root css-1013deo']"))
-    ))
-    print("Table body element located.")
-
-    # Find tbody within the table
-    tbody = table_body
-    print("Tbody found:", "Yes" if tbody else "No")
-
-    # Extract delegator rows within tbody using role attribute
-    validator_rows = tbody.find_elements(By.XPATH, ".//a[@role='row']")
-    print(f"Found {len(validator_rows)} validator rows in tbody.")
+    WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.XPATH, "//tbody[@class='MuiTableBody-root css-148otff']")))
 
     # Scroll to load all rows
     last_height = driver.execute_script("return document.body.scrollHeight")
-    for attempt in range(5):
+    for _ in range(5):
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        time.sleep(5)
+        time.sleep(3)
         new_height = driver.execute_script("return document.body.scrollHeight")
         if new_height == last_height:
-            print("Reached bottom of the page.")
             break
         last_height = new_height
 
+    # Extract delegators and delegated data
+    validator_rows = driver.find_elements(By.XPATH, "//tbody[@class='MuiTableBody-root css-148otff']//a[@role='row']")
     total_delegators, total_apt_delegated = 0, 0
-    for idx, row in enumerate(validator_rows, start=1):
+    for row in validator_rows:
         try:
             apt_delegated_td = row.find_elements(By.TAG_NAME, "td")[4]
-            apt_delegated = int(apt_delegated_td.text.split(" ")[0].replace(",", ""))
-            total_apt_delegated += apt_delegated
-            print(f"Row {idx} - APT Delegated: {apt_delegated}")
-
+            total_apt_delegated += int(apt_delegated_td.text.split(" ")[0].replace(",", ""))
             delegators_td = row.find_elements(By.TAG_NAME, "td")[6]
-            delegators_count = int(delegators_td.text.replace(",", ""))
-            total_delegators += delegators_count
-            print(f"Row {idx} - Delegators Count: {delegators_count}")
-
+            total_delegators += int(delegators_td.text.replace(",", ""))
         except (IndexError, ValueError) as e:
-            print(f"Error processing row {idx} data:", e)
-
-    # Check for zero total_delegators to avoid division by zero
-    if total_delegators == 0:
-        print("No delegators found, exiting to avoid division by zero.")
-    else:
-        print(f"Total Delegators: {total_delegators}")
-        print(f"Total APT Delegated: {total_apt_delegated}")
+            print("Error processing row data:", e)
 
     # Fetch the vesting data from CryptoRank
     driver.get("https://cryptorank.io/price/aptos/vesting")
