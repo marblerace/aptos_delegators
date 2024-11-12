@@ -65,28 +65,20 @@ try:
         
         # Open each validator link
         driver.get(url)
-        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//p[contains(@class, 'MuiTypography-root')]")))
+        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//p[contains(text(), 'Next Unlock')]")))
 
-        # Find all <p> elements with the class "MuiTypography-root MuiTypography-body1 ..."
-        p_elements = driver.find_elements(By.XPATH, "//p[contains(@class, 'MuiTypography-root') and contains(@class, 'MuiTypography-body1')]")
-        print(f"Found {len(p_elements)} <p> elements for validator {i + 1}")
+        # Locate the <p> element with text "Next Unlock"
+        next_unlock_element = driver.find_element(By.XPATH, "//p[text()='Next Unlock']")
+        print(f"Found 'Next Unlock' <p> element for validator {i + 1}")
 
-        # Check if there are enough <p> elements to retrieve the prelast one
-        if len(p_elements) >= 2:
-            prelast_p = p_elements[-2]  # Select the second-to-last <p> element
-            span_elements = prelast_p.find_elements(By.TAG_NAME, "span")
-            
-            # Print the text of all <span> elements within the prelast <p>, if any
-            if span_elements:
-                print(f"Validator {i + 1} spans:")
-                for span in span_elements:
-                    print(span.text or "[No text in this span]")
-            else:
-                print(f"Validator {i + 1}: No <span> elements found in the prelast <p> element.")
-        else:
-            print(f"Validator {i + 1}: Not enough <p> elements found to locate the prelast one.")
+        # Retrieve all <span> elements within the same parent or sibling hierarchy
+        span_elements = next_unlock_element.find_elements(By.XPATH, ".//following-sibling::span | .//ancestor::div//span")
+        print(f"Validator {i + 1} spans related to 'Next Unlock':")
+        
+        for span in span_elements:
+            print(span.text)
 
-        # Update validators.txt to replace the URL with confirmation that spans were processed
+        # Update validators.txt to confirm that "Next Unlock" data was processed
         urls[i] = f"processed validator {i}\n"
         with open(validators_file, "w") as file:
             file.writelines(urls)
