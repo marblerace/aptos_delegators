@@ -25,8 +25,8 @@ jobs:
         python -m pip install --upgrade pip
         pip install matplotlib pandas selenium requests webdriver-manager
 
-    - name: Run aptos_delegate.py
-      run: python aptos_delegate.py
+    #- name: Run aptos_delegate.py
+    #  run: python aptos_delegate.py
 
     - name: Run aptos_validators.py
       run: python aptos_validators.py

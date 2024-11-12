@@ -36,20 +36,28 @@ try:
 
     # Iterate through each validator row
     for i, row in enumerate(validator_rows, start=1):
-        row.click()  # Click to open the validator's detailed page
-        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//img[@alt='Identicon']")))
+        # Scroll to the row to ensure it's visible and clickable
+        driver.execute_script("arguments[0].scrollIntoView();", row)
+        time.sleep(1)  # Brief delay to allow scroll adjustment
 
-        # Select all Identicon elements and choose the second one
-        identicon_elements = driver.find_elements(By.XPATH, "//img[@alt='Identicon']")
-        if len(identicon_elements) >= 2:
-            second_identicon = identicon_elements[1]
-            print(f"Got for validator {i}")
-        else:
-            print(f"Validator {i}: Second Identicon not found")
+        try:
+            row.click()  # Click to open the validator's detailed page
+            WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//img[@alt='Identicon']")))
 
-        # Go back to the main page to click the next validator
-        driver.back()
-        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//tbody")))
+            # Select all Identicon elements and choose the second one
+            identicon_elements = driver.find_elements(By.XPATH, "//img[@alt='Identicon']")
+            if len(identicon_elements) >= 2:
+                second_identicon = identicon_elements[1]
+                print(f"Got for validator {i}")
+            else:
+                print(f"Validator {i}: Second Identicon not found")
+
+            # Go back to the main page to click the next validator
+            driver.back()
+            WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//tbody")))
+
+        except Exception as e:
+            print(f"Error clicking on validator {i}: {e}")
 
 finally:
     driver.quit()
