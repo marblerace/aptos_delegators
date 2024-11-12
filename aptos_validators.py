@@ -19,45 +19,29 @@ try:
     driver.get(url)
     WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.XPATH, "//tbody")))
 
-    # Scroll to load all validator rows
-    last_height = driver.execute_script("return document.body.scrollHeight")
-    for _ in range(5):
-        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        time.sleep(3)
-        new_height = driver.execute_script("return document.body.scrollHeight")
-        if new_height == last_height:
-            break
-        last_height = new_height
-    print("Reached bottom of the page.")
-
-    # Find validator rows by role attribute
+    # Find validator rows by role attribute and get their href
     validator_rows = driver.find_elements(By.XPATH, "//tbody//a[@role='row']")
     print(f"Found {len(validator_rows)} validator rows.")
 
     # Iterate through each validator row
     for i, row in enumerate(validator_rows, start=1):
-        # Scroll to the row to ensure it's visible and clickable
-        driver.execute_script("arguments[0].scrollIntoView();", row)
-        time.sleep(1)  # Brief delay to allow scroll adjustment
+        href = row.get_attribute("href")  # Get the relative href
+        full_url = f"https://explorer.aptoslabs.com{href}"
+        
+        # Open the validator's detailed page
+        driver.get(full_url)
+        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//img[@alt='Identicon']")))
 
-        try:
-            row.click()  # Click to open the validator's detailed page
-            WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//img[@alt='Identicon']")))
+        # Select all Identicon elements and choose the second one
+        identicon_elements = driver.find_elements(By.XPATH, "//img[@alt='Identicon']")
+        if len(identicon_elements) >= 2:
+            print(f"Got Identicon for validator {i}")
+        else:
+            print(f"Validator {i}: Second Identicon not found")
 
-            # Select all Identicon elements and choose the second one
-            identicon_elements = driver.find_elements(By.XPATH, "//img[@alt='Identicon']")
-            if len(identicon_elements) >= 2:
-                second_identicon = identicon_elements[1]
-                print(f"Got for validator {i}")
-            else:
-                print(f"Validator {i}: Second Identicon not found")
-
-            # Go back to the main page to click the next validator
-            driver.back()
-            WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//tbody")))
-
-        except Exception as e:
-            print(f"Error clicking on validator {i}: {e}")
+        # Return to the main page
+        driver.get(url)
+        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//tbody")))
 
 finally:
     driver.quit()
