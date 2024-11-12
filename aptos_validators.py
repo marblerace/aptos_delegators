@@ -52,6 +52,12 @@ try:
     with open(validators_file, "r") as file:
         urls = file.readlines()
 
+
+
+
+
+
+
     # Process each validator link from the file
     for i, url in enumerate(urls):
         url = url.strip()
@@ -64,10 +70,24 @@ try:
         # Locate Identicon images and confirm if the second one is found
         identicon_elements = driver.find_elements(By.XPATH, "//img[@alt='Identicon']")
         if len(identicon_elements) >= 2:
-            print(f"Got Identicon for validator {i + 1}")
+            print(f"Identicon found for validator {i + 1}")
 
-        # Update validators.txt to replace the URL with got[i]
-        urls[i] = f"got[{i}]\n"
+            # Step 1: Navigate to the outermost <div class="MuiStack-root">
+            outer_stack_div = identicon_elements[1].find_element(By.XPATH, "./ancestor::div[contains(@class, 'MuiStack-root')]")
+
+            # Step 2: Drill down to the last child <div class="MuiStack-root"> inside the hierarchy
+            nested_div = outer_stack_div.find_element(By.XPATH, ".//div[contains(@class, 'MuiStack-root')][last()]")
+
+            # Step 3: Retrieve and print all <span> elements within the last nested div
+            span_elements = nested_div.find_elements(By.XPATH, ".//span")
+            print(f"Validator {i + 1} spans:")
+            for span in span_elements:
+                print(span.text)
+        else:
+            print(f"Validator {i + 1}: Second Identicon not found")
+
+        # Update validators.txt to replace the URL with confirmation that Identicon was processed
+        urls[i] = f"processed validator {i}\n"
         with open(validators_file, "w") as file:
             file.writelines(urls)
 
