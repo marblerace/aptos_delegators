@@ -21,42 +21,39 @@ try:
     WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.XPATH, "//table//tbody")))
     print("Page loaded and table found.")
 
-    # Scroll to load all rows
+    # Scroll until all validator rows are loaded
     last_height = driver.execute_script("return document.body.scrollHeight")
-    for _ in range(5):
+    while True:
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        time.sleep(3)
+        time.sleep(3)  # Give time for new rows to load
         new_height = driver.execute_script("return document.body.scrollHeight")
         if new_height == last_height:
+            print("Reached bottom of the page.")
             break
         last_height = new_height
 
-    # Initialize a loop to find validator rows and navigate to their pages
-    num_validators = 40  # Replace with actual count if needed
-    for i in range(num_validators):
-        # Re-fetch the validator rows on each iteration to avoid stale element issues
-        tbody = driver.find_element(By.XPATH, "//table//tbody")
-        validator_rows = tbody.find_elements(By.XPATH, ".//a[@role='row']")
-        
-        if i >= len(validator_rows):
-            print(f"Validator {i + 1} could not be found, ending iteration.")
-            break
+    # Now retrieve all validator rows
+    tbody = driver.find_element(By.XPATH, "//table//tbody")
+    validator_rows = tbody.find_elements(By.XPATH, ".//a[@role='row']")
+    print(f"Found {len(validator_rows)} validator rows in tbody.")
 
-        # Get href and navigate to the validator's detailed page
-        href = validator_rows[i].get_attribute("href")
-        print(f"Opening validator {i + 1} URL: {href}")
+    # Loop through each validator row to get href link and open it
+    for i, row in enumerate(validator_rows, start=1):
+        href = row.get_attribute("href")
+        print(f"Opening validator {i} URL: {href}")
+
+        # Open each validator link
         driver.get(href)
-        
-        # Wait for the Identicon to load on the validator's detail page
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//img[@alt='Identicon']")))
-        identicon_elements = driver.find_elements(By.XPATH, "//img[@alt='Identicon']")
-        
-        if len(identicon_elements) >= 2:
-            print(f"Got Identicon for validator {i + 1}")
-        else:
-            print(f"Validator {i + 1}: Second Identicon not found")
 
-        # Navigate back to the main page
+        # Locate Identicon images and print if the second one is found
+        identicon_elements = driver.find_elements(By.XPATH, "//img[@alt='Identicon']")
+        if len(identicon_elements) >= 2:
+            print(f"Got Identicon for validator {i}")
+        else:
+            print(f"Validator {i}: Second Identicon not found")
+
+        # Return to the main page for the next validator
         driver.get(url)
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//table//tbody")))
 
