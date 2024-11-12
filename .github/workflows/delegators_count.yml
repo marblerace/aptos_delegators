@@ -28,6 +28,9 @@ jobs:
     - name: Run aptos_delegate.py
       run: python aptos_delegate.py
 
+    - name: Run aptos_validators.py
+      run: python aptos_validators.py
+
     - name: Commit and push results
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
