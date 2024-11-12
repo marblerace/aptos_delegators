@@ -73,16 +73,27 @@ try:
 
         # Retrieve all <span> elements within the same parent or sibling hierarchy
         span_elements = next_unlock_element.find_elements(By.XPATH, ".//following-sibling::span | .//ancestor::div//span")
-        print(f"Validator {i + 1} spans related to 'Next Unlock':")
-        
-        for span in span_elements:
-            print(span.text)
+        unlock_time = None
 
-        # Update validators.txt to confirm that "Next Unlock" data was processed
-        urls[i] = f"processed validator {i}\n"
+        for span in span_elements:
+            # Check if the span text contains the unlock time format (e.g., '9d 11h 54m 15s')
+            if any(unit in span.text for unit in ["d", "h", "m", "s"]):  # Look for time format
+                unlock_time = span.text
+                break  # Stop once the time string is found
+
+        # Extract the validator address from the URL
+        address = url.split("/validator/")[1].split("?")[0]
+        print(f"Validator {i + 1} address: {address}")
+        print(f"Unlock time for validator {i + 1}: {unlock_time}")
+
+        # Update validators.txt with the address and unlock time
+        if unlock_time:
+            urls[i] = f"{address}: {unlock_time}\n"
+        else:
+            urls[i] = f"{address}: Unlock time not found\n"  # In case unlock time is missing
+
         with open(validators_file, "w") as file:
             file.writelines(urls)
-
 
 finally:
     driver.quit()
