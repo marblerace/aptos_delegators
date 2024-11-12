@@ -29,11 +29,10 @@ try:
     # Loop through each validator row to get href link and open it
     for i, row in enumerate(validator_rows, start=1):
         href = row.get_attribute("href")
-        full_url = href
-        print(f"Opening validator {i} URL: {full_url}")
+        print(f"Opening validator {i} URL: {href}")
         
         # Open each validator link
-        driver.get(full_url)
+        driver.get(href)
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//img[@alt='Identicon']")))
 
         # Locate Identicon images and print if the second one is found
