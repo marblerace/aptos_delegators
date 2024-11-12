@@ -38,6 +38,7 @@ def retry_action(driver, action, retries=3, wait_time=5):
     while attempt < retries:
         try:
             result = action()
+            print(f"Attempt {attempt + 1} succeeded.")
             return result
         except Exception as e:
             print(f"Attempt {attempt + 1} failed: {e}")
@@ -66,6 +67,18 @@ try:
     ))
     print("Table body element located.")
 
+    # Find the table
+    table = driver.find_element(By.XPATH, "//table[contains(@class, 'MuiTable-root')]")
+    print("Table found:", "Yes" if table else "No")
+
+    # Find tbody within the table
+    tbody = table.find_element(By.TAG_NAME, "tbody")
+    print("Tbody found:", "Yes" if tbody else "No")
+
+    # Extract delegator rows within tbody
+    validator_rows = tbody.find_elements(By.XPATH, ".//a[@role='row']")
+    print(f"Found {len(validator_rows)} validator rows in tbody.")
+
     # Scroll to load all rows
     last_height = driver.execute_script("return document.body.scrollHeight")
     for attempt in range(5):
@@ -77,19 +90,21 @@ try:
             break
         last_height = new_height
 
-    # Extract delegators and delegated data
-    validator_rows = driver.find_elements(By.XPATH, "//tbody[@class='MuiTableBody-root css-fzvvaf']//a[@role='row']")
-    print(f"Found {len(validator_rows)} validator rows after scrolling.")
-
     total_delegators, total_apt_delegated = 0, 0
-    for row in validator_rows:
+    for idx, row in enumerate(validator_rows, start=1):
         try:
             apt_delegated_td = row.find_elements(By.TAG_NAME, "td")[4]
-            total_apt_delegated += int(apt_delegated_td.text.split(" ")[0].replace(",", ""))
+            apt_delegated = int(apt_delegated_td.text.split(" ")[0].replace(",", ""))
+            total_apt_delegated += apt_delegated
+            print(f"Row {idx} - APT Delegated: {apt_delegated}")
+
             delegators_td = row.find_elements(By.TAG_NAME, "td")[6]
-            total_delegators += int(delegators_td.text.replace(",", ""))
+            delegators_count = int(delegators_td.text.replace(",", ""))
+            total_delegators += delegators_count
+            print(f"Row {idx} - Delegators Count: {delegators_count}")
+
         except (IndexError, ValueError) as e:
-            print("Error processing row data:", e)
+            print(f"Error processing row {idx} data:", e)
 
     print(f"Total Delegators: {total_delegators}")
     print(f"Total APT Delegated: {total_apt_delegated}")
