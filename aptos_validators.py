@@ -7,7 +7,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 import time
 
-# Configure Chrome options
 chrome_options = Options()
 chrome_options.add_argument("--headless")
 chrome_options.add_argument("--no-sandbox")
@@ -19,6 +18,17 @@ url = "https://explorer.aptoslabs.com/validators/delegation?network=mainnet"
 try:
     driver.get(url)
     WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.XPATH, "//tbody")))
+
+    # Scroll to load all validator rows
+    last_height = driver.execute_script("return document.body.scrollHeight")
+    for _ in range(5):
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        time.sleep(3)
+        new_height = driver.execute_script("return document.body.scrollHeight")
+        if new_height == last_height:
+            break
+        last_height = new_height
+    print("Reached bottom of the page.")
 
     # Find validator rows by role attribute
     validator_rows = driver.find_elements(By.XPATH, "//tbody//a[@role='row']")
