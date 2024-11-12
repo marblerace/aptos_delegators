@@ -9,8 +9,8 @@ import requests
 import pandas as pd
 import matplotlib.pyplot as plt
 import time
-import os
 from datetime import datetime
+import os
 
 print("Starting script")
 
@@ -32,6 +32,19 @@ def fetch_apt_price():
         print("Error fetching data from Aptos Scan API:", e)
         return 0.0
 
+# Retry mechanism for Selenium actions
+def retry_action(driver, action, retries=3, wait_time=5):
+    attempt = 0
+    while attempt < retries:
+        try:
+            result = action()
+            return result
+        except Exception as e:
+            print(f"Attempt {attempt + 1} failed: {e}")
+            time.sleep(wait_time)
+            attempt += 1
+    raise Exception(f"Failed to complete action after {retries} attempts.")
+
 # Fetch the current APT price
 apt_price = fetch_apt_price()
 
@@ -46,8 +59,11 @@ try:
     url = "https://explorer.aptoslabs.com/validators/delegation?network=mainnet"
     driver.get(url)
     print("Page loaded, waiting for table body element to be present.")
-    
-    WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.XPATH, "//tbody[@class='MuiTableBody-root css-fzvvaf']")))
+
+    # Retry locating the table body
+    table_body = retry_action(driver, lambda: WebDriverWait(driver, 30).until(
+        EC.presence_of_element_located((By.XPATH, "//tbody[@class='MuiTableBody-root css-fzvvaf']"))
+    ))
     print("Table body element located.")
 
     # Scroll to load all rows
@@ -65,7 +81,6 @@ try:
     validator_rows = driver.find_elements(By.XPATH, "//tbody[@class='MuiTableBody-root css-fzvvaf']//a[@role='row']")
     print(f"Found {len(validator_rows)} validator rows after scrolling.")
 
-    # Initialize totals
     total_delegators, total_apt_delegated = 0, 0
     for row in validator_rows:
         try:
@@ -75,6 +90,9 @@ try:
             total_delegators += int(delegators_td.text.replace(",", ""))
         except (IndexError, ValueError) as e:
             print("Error processing row data:", e)
+
+    print(f"Total Delegators: {total_delegators}")
+    print(f"Total APT Delegated: {total_apt_delegated}")
 
     # Fetch the vesting data from CryptoRank
     driver.get("https://cryptorank.io/price/aptos/vesting")
