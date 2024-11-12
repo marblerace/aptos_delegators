@@ -17,6 +17,9 @@ driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), opti
 url = "https://explorer.aptoslabs.com/validators/delegation?network=mainnet"
 validators_file = "validators.txt"
 
+# Ensure validators.txt is created if missing
+open(validators_file, "w").close()
+
 try:
     driver.get(url)
     WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.XPATH, "//table//tbody")))

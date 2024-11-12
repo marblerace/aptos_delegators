@@ -25,8 +25,8 @@ jobs:
         python -m pip install --upgrade pip
         pip install matplotlib pandas selenium requests webdriver-manager
 
-    #- name: Run aptos_delegate.py
-    #  run: python aptos_delegate.py
+    - name: Run aptos_delegate.py
+      run: python aptos_delegate.py
 
     - name: Run aptos_validators.py
       run: python aptos_validators.py
@@ -37,8 +37,10 @@ jobs:
       run: |
         git config --global user.name 'github-actions'
         git config --global user.email 'github-actions@github.com'
-        git add README.md delegators_data.csv delegators_plot.png
+        git add README.md delegators_data.csv delegators_plot.png validators.txt
         if [ -n "$(git status --porcelain)" ]; then
-          git commit -m 'Update delegators count and plot'
+          git commit -m 'Update delegators count, plot, and validator info'
           git push
+        else
+          echo "No changes to commit"
         fi
