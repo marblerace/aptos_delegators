@@ -63,7 +63,7 @@ try:
 
     # Retry locating the table body
     table_body = retry_action(driver, lambda: WebDriverWait(driver, 30).until(
-        EC.presence_of_element_located((By.XPATH, "//tbody[@class='MuiTableBody-root css-fzvvaf']"))
+        EC.presence_of_element_located((By.XPATH, "//tbody[@class='MuiTableBody-root css-1013deo']"))
     ))
     print("Table body element located.")
 
@@ -105,9 +105,6 @@ try:
 
         except (IndexError, ValueError) as e:
             print(f"Error processing row {idx} data:", e)
-
-    print(f"Total Delegators: {total_delegators}")
-    print(f"Total APT Delegated: {total_apt_delegated}")
 
     # Fetch the vesting data from CryptoRank
     driver.get("https://cryptorank.io/price/aptos/vesting")
