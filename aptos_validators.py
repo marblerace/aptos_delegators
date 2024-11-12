@@ -21,9 +21,9 @@ try:
     WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.XPATH, "//table//tbody")))
     print("Page loaded and table found.")
 
-    # Locate tbody and find all validator row elements with href attribute
-    tbody = driver.find_element(By.XPATH, "//table//tbody")
-    validator_rows = tbody.find_elements(By.XPATH, ".//a[@role='row']")
+    # Adding explicit wait to ensure all rows are fully loaded
+    time.sleep(3)  # Adding a delay to let rows load if needed
+    validator_rows = driver.find_elements(By.XPATH, "//tbody//a[@role='row']")
     print(f"Found {len(validator_rows)} validator rows in tbody.")
 
     # Loop through each validator row to get href link and open it
