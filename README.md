@@ -1,6 +1,6 @@
-# Delegators Count (APT $12.10)<br><br>
-Total Delegators: 48356<br>
-Total APT Delegated: 324700429<br><br>
+# Delegators Count (APT $11.56)<br><br>
+Total Delegators: 48362<br>
+Total APT Delegated: 324730412<br><br>
 ![Delegators Plot](delegators_plot.png)<br><br>
 **OP received for the third airdrop on 18.09.2023 (price of OP was $1.368):**<br>
 Addresses received drop: 31870<br>
@@ -8,7 +8,7 @@ Average amount received: 609.08 ($833.22)<br>
 Median amount received: 238.49 ($326.26)<br>
 Total drop distribution: 19411313 ($26554676.18)<br><br>
 If Aptos Foundation team spent the same amount for the delegation airdrop as Optimism Foundation team ($26554676.18),<br>
-they will spend 2194601.34 APT for this airdrop.<br>
-With this logic, every APT delegate will receive on average: 45.38 APT ($549.15)<br><br>
-Currently Foundation team has unlocked: 38533000.00 APT ($466249300.00)<br>
-If Aptos Foundation team spent this amount for the delegation airdrop, every APT delegate will receive : 796.86 APT ($9642.02)<br>
+they will spend 2297117.32 APT for this airdrop.<br>
+With this logic, every APT delegate will receive on average: 47.50 APT ($549.08)<br><br>
+Currently Foundation team has unlocked: 38533000.00 APT ($445441480.00)<br>
+If Aptos Foundation team spent this amount for the delegation airdrop, every APT delegate will receive : 796.76 APT ($9210.57)<br>
