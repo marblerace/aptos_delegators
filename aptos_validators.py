@@ -5,6 +5,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.common.exceptions import TimeoutException, WebDriverException, NoSuchElementException
 import time
 import re
 from datetime import datetime, timezone, timedelta
@@ -73,32 +74,52 @@ try:
     # Process each validator link
     for i, url in enumerate(urls):
         url = url.strip()
+        if not url:
+            continue
         print(f"Opening validator {i + 1} URL: {url}")
-        
-        driver.get(url)
-        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//p[contains(text(), 'Next Unlock')]")))
 
-        next_unlock_element = driver.find_element(By.XPATH, "//p[text()='Next Unlock']")
-        print(f"Found 'Next Unlock' <p> element for validator {i + 1}")
+        # Derive validator address early so we can log something even if the page fails to load
+        address = url.split("/validator/")[1].split("?")[0] if "validator/" in url else url
 
-        span_elements = next_unlock_element.find_elements(By.XPATH, ".//following-sibling::span | .//ancestor::div//span")
-        unlock_time_text = None
+        try:
+            # Fail fast instead of hanging the whole workflow
+            driver.set_page_load_timeout(45)
+            driver.get(url)
+            WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.XPATH, "//p[contains(text(), 'Next Unlock')]")))
 
-        for span in span_elements:
-            if re.match(r"\d+d \d+h \d+m \d+s|\d+d \d+h \d+m|\d+h \d+m \d+s|\d+h \d+m", span.text):
-                unlock_time_text = span.text
-                break
+            next_unlock_element = driver.find_element(By.XPATH, "//p[text()='Next Unlock']")
+            print(f"Found 'Next Unlock' <p> element for validator {i + 1}")
 
-        address = url.split("/validator/")[1].split("?")[0]
-        if unlock_time_text:
-            precise_unlock_time = calculate_unlock_time(unlock_time_text)
-            print(f"Unlock time for validator {i + 1}: {precise_unlock_time}")
-            urls[i] = f"{address}: {precise_unlock_time}\n"
-        else:
-            urls[i] = f"{address}: Unlock time not found\n"
+            span_elements = next_unlock_element.find_elements(By.XPATH, ".//following-sibling::span | .//ancestor::div//span")
+            unlock_time_text = None
 
-        with open(validators_file, "w") as file:
-            file.writelines(urls)
+            for span in span_elements:
+                if re.match(r"\d+d \d+h \d+m \d+s|\d+d \d+h \d+m|\d+h \d+m \d+s|\d+h \d+m", span.text):
+                    unlock_time_text = span.text
+                    break
+
+            if unlock_time_text:
+                precise_unlock_time = calculate_unlock_time(unlock_time_text)
+                print(f"Unlock time for validator {i + 1}: {precise_unlock_time}")
+                urls[i] = f"{address}: {precise_unlock_time}\n"
+            else:
+                print(f"Unlock time not found for validator {i + 1}")
+                urls[i] = f"{address}: Unlock time not found\n"
+
+        except (TimeoutException, WebDriverException) as e:
+            # Log and continue instead of crashing the workflow
+            print(f"Timed out or failed to load validator {i + 1}: {e}")
+            urls[i] = f"{address}: Unable to load page\n"
+        except NoSuchElementException as e:
+            print(f"'Next Unlock' element missing for validator {i + 1}: {e}")
+            urls[i] = f"{address}: Unlock time element not found\n"
+        except Exception as e:
+            print(f"Unexpected error with validator {i + 1}: {e}")
+            urls[i] = f"{address}: Error retrieving data\n"
+        finally:
+            # Persist partial progress so a single failure does not lose prior results
+            with open(validators_file, "w") as file:
+                file.writelines(urls)
 
 finally:
     driver.quit()
